@@ -12,10 +12,16 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 module.exports = Task;
 
-function Task(snInstanceURL, snCoookie, options) {
-    this.snInstanceURL = snInstanceURL;
-    this.snCoookie = snCoookie;
-    this.options = options;
+// function Task(snInstanceURL, snCoookie, options) {
+//     this.snInstanceURL = snInstanceURL;
+//     this.snCoookie = snCoookie;
+//     this.options = options;
+// }
+
+function Task(snInstanceURL, accessToken, options) {
+     this.snInstanceURL = snInstanceURL;
+     this.accessToken = accessToken;
+     this.options = options;
 }
 
 // Returns the tasks assigned to user.
@@ -29,8 +35,11 @@ Task.prototype.getTasks = function (callBack) {
         uri: '/api/x_snc_my_work/v1/tracker/task',
         json: true,
         // Set the cookie to authenticate the request.
-        headers: {
-            'Cookie': this.snCoookie
+        // headers: {
+        //     'Cookie': this.snCoookie
+        // }
+        auth: {
+             bearer: this.accessToken
         }
 
     }, function (err, response, body) {

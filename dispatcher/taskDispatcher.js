@@ -10,13 +10,24 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
  * This module dispatches the task related operations to relevant task api method. It assumes an earlier
  * request using authenticate module should have save the cookie in session.
  */
+
+var config = require('../config'); 
+
 module.exports = {
 	// Returns the tasks assigned to user.	
     getTasks: function(serverRequest, serverResponse) {
-        if (serverRequest.session && serverRequest.session.snConfig && serverRequest.session.snConfig.snCookie) {
+
+        //if (serverRequest.session && serverRequest.session.snConfig && serverRequest.session.snConfig.snCookie) {
+           var session = serverRequest.session;
+           if (session && session.passport && session.passport.user.accessToken) {
             var SNTask = serverRequest.app.get('snTask');
             var options = serverRequest.app.get('options');
-            var snTask = new SNTask(serverRequest.session.snConfig.snInstanceURL, serverRequest.session.snConfig.snCookie, options);
+            var snTask = new SNTask(config.instanceURL, session.passport.user.accessToken, options);
+
+
+            //var SNTask = serverRequest.app.get('snTask');
+            //var options = serverRequest.app.get('options');
+            //var snTask = new SNTask(serverRequest.session.snConfig.snInstanceURL, serverRequest.session.snConfig.snCookie, options);
             snTask.getTasks(function(error, response, body) {
                 serverRequest.app.get('respLogger').logResponse(options, response, body);
                 if (!error) {

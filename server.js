@@ -47,6 +47,27 @@ app.use(session({
     activeDuration: 5 * 60 * 1000,
 }));
 
+// Set up Passport 
+var config = require('./config'); 
+var passport = require('passport');
+OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
+app.use(passport.initialize());
+
+passport.use('provider', new OAuth2Strategy({authorizationURL: config.oauth.authURL, tokenURL: config.oauth.tokenURL, clientID: config.oauth.clientID, clientSecret: config.oauth.clientSecret, callbackURL: config.oauth.callbackURL}, 
+    function(accessToken, refreshToken, profile, done) {  
+        var tokenInfo = {};  tokenInfo.accessToken = accessToken; tokenInfo.refreshToken = refreshToken;
+         console.log(tokenInfo);
+         done(null, tokenInfo); } 
+));
+
+passport.serializeUser(function(user, done) { 
+    done(null, user); 
+});
+
+passport.deserializeUser(function(id, done) { 
+    done(null, id); 
+});
+
 // Create our Express router
 var router = express.Router();
 
@@ -60,6 +81,13 @@ router.delete('/logout', function(req, res) {
     req.session.destroy();
     res.end("Deleted");
 });
+
+// Passport Routes 
+router.get('/auth/provider', passport.authenticate('provider')); 
+router.get('/auth/provider/callback', passport.authenticate('provider', { 
+    successRedirect: '/',
+    failureRedirect: '/login'
+}));
 
 // Register the router
 app.use(router);
